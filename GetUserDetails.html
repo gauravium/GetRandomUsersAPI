@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Users</title>
+    <style>
+        /* Style for user details */
+        .user-details {
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 20px;
+            margin: 20px;
+            width: 300px;
+        }
+        .user-details img {
+            border-radius: 50%;
+            margin-bottom: 10px;
+        }
+        .user-details p {
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="user-details" id="user-details">
+        <h2>Loading...</h2>
+    </div>
+
+    <script>
+        // Function to fetch user data from the API
+        async function fetchUserData() {
+            try {
+                const response = await fetch('http://localhost:5296/api/RandomUser/GetUser');
+                const data = await response.json();
+                return data.results[0];
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                return null;
+            }
+        }
+
+        // Function to display user data in HTML
+        async function displayUserData() {
+            const userDetailsDiv = document.getElementById('user-details');
+            userDetailsDiv.innerHTML = '<h2>Loading...</h2>';
+
+            const userData = await fetchUserData();
+            if (userData) {
+                userDetailsDiv.innerHTML = `
+                    <img src="${userData.picture.medium}" alt="User Image">
+                    <p><strong>Name:</strong> ${userData.name.first} ${userData.name.last}</p>
+                    <p><strong>Gender:</strong> ${userData.gender}</p>
+                    <p><strong>Location:</strong> ${userData.location.street.number} ${userData.location.street.name}, ${userData.location.city}, ${userData.location.state}, ${userData.location.country}, ${userData.location.postcode}</p>
+                    <p><strong>Email:</strong> ${userData.email}</p>
+                    <p><strong>Phone:</strong> ${userData.phone}</p>
+                    <p><strong>Cell:</strong> ${userData.cell}</p>
+                    <p><strong>DOB:</strong> ${new Date(userData.dob.date).toLocaleDateString()}</p>
+                    <p><strong>Registered Since:</strong> ${new Date(userData.registered.date).toLocaleDateString()}</p>
+                    </br>
+                    <p><strong>Reload for a new user.</strong>
+                `;
+            } else {
+                userDetailsDiv.innerHTML = '<h2>Error fetching user data!</h2>';
+            }
+        }
+
+        // Call the function to display user data
+        displayUserData();
+    </script>
+</body>
+</html>
