@@ -3,49 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Users</title>
-    <style>
-        /* Style for user details */
-        .user-details {
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 20px;
-            margin: 20px;
-            width: 300px;
-        }
-        .user-details img {
-            border-radius: 50%;
-            margin-bottom: 10px;
-        }
-        .user-details p {
-            margin: 5px 0;
-        }
-    </style>
+    <title>User Details</title>
 </head>
 <body>
-    <div class="user-details" id="user-details">
-        <h2>Loading...</h2>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username">
+    <label for="password">Password:</label>
+    <input type="password" id="password" name="password">
+    <button onclick="displayUserData()">Get User Data</button>
+    <br/><br/>
+
+    <div id="user-details">
+        <!-- User details will be displayed here -->
     </div>
 
     <script>
-        // Function to fetch user data from the API
-        async function fetchUserData() {
-            try {
-                const response = await fetch('http://localhost:5296/api/RandomUser/GetUser');
-                const data = await response.json();
-                return data.results[0];
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-                return null;
-            }
-        }
-
-        // Function to display user data in HTML
         async function displayUserData() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
             const userDetailsDiv = document.getElementById('user-details');
             userDetailsDiv.innerHTML = '<h2>Loading...</h2>';
 
-            const userData = await fetchUserData();
+            const userData = await fetchUserData(username, password);
             if (userData) {
                 userDetailsDiv.innerHTML = `
                     <img src="${userData.picture.medium}" alt="User Image">
@@ -58,15 +37,26 @@
                     <p><strong>DOB:</strong> ${new Date(userData.dob.date).toLocaleDateString()}</p>
                     <p><strong>Registered Since:</strong> ${new Date(userData.registered.date).toLocaleDateString()}</p>
                     </br>
-                    <p><strong>Reload for a new user.</strong>
                 `;
             } else {
                 userDetailsDiv.innerHTML = '<h2>Error fetching user data!</h2>';
             }
         }
 
-        // Call the function to display user data
-        displayUserData();
+        async function fetchUserData(username, password) {
+            try {
+                const response = await fetch('http://localhost:5296/api/RandomUser/GetUser', {
+                    headers: {
+                        'Authorization': 'Basic ' + btoa(username + ':' + password)
+                    }
+                });
+                const data = await response.json();
+                return data.results[0];
+            } catch (error) {
+                console.error('Error fetching user data:', error);
+                return null;
+            }
+        }
     </script>
 </body>
 </html>
